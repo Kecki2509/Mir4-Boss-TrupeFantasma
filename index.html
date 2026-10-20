@@ -1,699 +1,408 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIR4 Boss Timer - Trupe Fantasma HUD</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700&family=Space+Grotesk:wght=700;800&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIR4 Boss Timer - Trupe Fantasma HUD</title>
+<style>
+:root{
+  --bg-dark:#04060a;
+  --glass-panel:rgba(10,16,28,.92);
+  --glass-card:rgba(16,25,43,.82);
+  --glass-border:rgba(255,255,255,.04);
+  --neon-gold:#e5b842;
+  --neon-gold-glow:rgba(229,184,66,.2);
+  --neon-blue:#00d2ff;
+  --neon-green:#00ff87;
+  --neon-red:#ff4a4a;
+  --text-main:#f3f4f6;
+  --text-muted:#8ca0ba;
+  --trupe-gradient:linear-gradient(135deg,#ff416c,#8a2387,#00d2ff);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--font);
+  background:var(--bg-dark);
+  color:var(--text-main);
+  padding:30px 20px;
+  display:flex;flex-direction:column;align-items:center;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 50% 0%,#111a2e 0%,#030508 80%);
+}
+header{text-align:center;margin-bottom:35px}
+.team-badge{
+  display:inline-block;margin-bottom:4px;
+  font-weight:800;font-size:1rem;letter-spacing:4px;text-transform:uppercase;
+  background:var(--trupe-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+h1{
+  font-size:2.8rem;font-weight:800;letter-spacing:-1px;
+  background:linear-gradient(135deg,#fff 40%,var(--neon-gold) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+header p{color:var(--text-muted);margin-top:8px;font-size:.9rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600}
 
-        :root {
-            --bg-dark: #04060a;
-            --bg-gradient: radial-gradient(circle at 50% 0%, #111a2e 0%, #030508 80%);
-            --glass-panel: rgba(10, 16, 28, 0.75);
-            --glass-card: rgba(16, 25, 43, 0.5);
-            --glass-border: rgba(255, 255, 255, 0.04);
-            --neon-gold: #e5b842;
-            --neon-gold-glow: rgba(229, 184, 66, 0.2);
-            --neon-blue: #00d2ff;
-            --neon-green: #00ff87;
-            --neon-red: #ff4a4a;
-            --text-main: #f3f4f6;
-            --text-muted: #8ca0ba;
-            --trupe-gradient: linear-gradient(135deg, #ff416c, #8a2387, #00d2ff);
-        }
+.top-navigation{
+  display:flex;justify-content:space-between;align-items:center;
+  width:100%;max-width:1280px;margin-bottom:30px;padding:14px 24px;
+  background:var(--glass-panel);border:1px solid var(--glass-border);border-radius:16px;
+  box-shadow:0 25px 50px rgba(0,0,0,.5);
+}
+.filter-tabs{display:flex;align-items:center;gap:8px}
+.filter-tabs span{color:var(--neon-gold);font-size:.8rem;font-weight:800;letter-spacing:1.5px;margin-right:12px}
+.tab-btn{
+  background:rgba(255,255,255,.02);border:1px solid transparent;color:var(--text-muted);
+  font-family:inherit;font-weight:600;font-size:.85rem;padding:8px 18px;cursor:pointer;border-radius:8px;
+  transition:color .2s,background-color .2s,box-shadow .2s;
+}
+.tab-btn:hover{color:var(--text-main);background:rgba(255,255,255,.06)}
+.tab-btn.active{color:#04060a;background:var(--neon-gold);font-weight:700;box-shadow:0 0 15px var(--neon-gold-glow)}
+.search-container input{
+  width:280px;padding:10px 16px;outline:none;
+  background:rgba(0,0,0,.3);border:1px solid var(--glass-border);border-radius:8px;
+  color:#fff;font-family:inherit;font-size:.9rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.search-container input:focus{border-color:var(--neon-blue);box-shadow:0 0 15px rgba(0,210,255,.15)}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+.main-hud{display:flex;width:100%;max-width:1280px;gap:30px}
+.sidebar{width:290px;display:flex;flex-direction:column;gap:20px;flex-shrink:0}
+.side-panel{
+  background:var(--glass-panel);border:1px solid var(--glass-border);border-radius:16px;
+  padding:22px;box-shadow:0 15px 35px rgba(0,0,0,.4);
+}
+.panel-title{
+  display:flex;align-items:center;gap:8px;margin-bottom:18px;
+  font-size:.75rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;
+}
+.side-brand{
+  margin-left:auto;font-size:.7rem;font-weight:800;
+  background:var(--trupe-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.live-panel{
+  border-color:rgba(255,74,74,.12);
+  background:radial-gradient(circle at 0 0,rgba(255,74,74,.05) 0%,var(--glass-panel) 100%);
+}
+.live-item{
+  background:rgba(255,74,74,.04);border:1px solid rgba(255,74,74,.12);border-radius:10px;
+  padding:12px 14px;margin-bottom:10px;cursor:pointer;
+  transition:background-color .2s,border-color .2s,transform .2s;
+}
+.live-item:hover{background:rgba(255,74,74,.1);border-color:var(--neon-red);transform:translateY(-2px)}
+.live-title{display:flex;justify-content:space-between;font-weight:700;color:#fff;font-size:.9rem;letter-spacing:.5px}
+.live-status{color:var(--neon-red);font-size:.8rem;font-weight:800;text-shadow:0 0 8px var(--neon-red);animation:pulse 1.2s infinite alternate}
+.live-desc{color:var(--text-muted);font-size:.75rem;margin-top:5px}
+.live-empty{color:var(--text-muted);font-size:.85rem;text-align:center;padding:5px}
+@keyframes pulse{from{opacity:.5}to{opacity:1}}
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-dark) var(--bg-gradient) no-repeat fixed;
-            color: var(--text-main);
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+.audio-btn,.clear-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;cursor:pointer;
+  font-family:inherit;font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.5px;
+  border:1px solid var(--glass-border);border-radius:10px;
+  transition:background-color .2s,border-color .2s,color .2s;
+}
+.audio-btn{background:rgba(0,255,135,.05);border-color:rgba(0,255,135,.15);color:var(--neon-green)}
+.audio-btn:hover{background:rgba(0,255,135,.12);border-color:var(--neon-green)}
+.audio-btn.muted{background:rgba(255,74,74,.05);border-color:rgba(255,74,74,.15);color:var(--neon-red)}
+.audio-btn.muted:hover{background:rgba(255,74,74,.12);border-color:var(--neon-red)}
+.clear-btn{background:rgba(255,255,255,.01);color:var(--text-muted)}
+.clear-btn:hover{background:rgba(255,74,74,.08);color:var(--neon-red);border-color:rgba(255,74,74,.2)}
 
-        header {
-            text-align: center;
-            margin-bottom: 35px;
-        }
+.progress-box{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.02);border-radius:10px;padding:18px;text-align:center}
+.counter{font-size:2.5rem;font-weight:800;color:#fff;letter-spacing:-1px}
+.progress-box .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-weight:600}
 
-        header .team-badge {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 800;
-            font-size: 1rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            background: var(--trupe-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 4px;
-            display: inline-block;
-            filter: drop-shadow(0 2px 8px rgba(0,210,255,0.3));
-        }
+.grid-container{flex-grow:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(48%,1fr));gap:20px;align-content:flex-start}
+.card{
+  position:relative;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;
+  background:var(--glass-card);border:1px solid var(--glass-border);border-radius:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,.2);
+  transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+.card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.5)}
+.card-lvl-badge{
+  position:absolute;top:16px;right:20px;padding:4px 10px;border-radius:6px;
+  font-size:.7rem;font-weight:800;letter-spacing:.5px;background:rgba(255,255,255,.04);color:var(--text-muted);
+}
+.lvl-140{border-left:3px solid #38bdf8}
+.lvl-141{border-left:3px solid #4ade80}
+.lvl-143{border-left:3px solid #06b6d4}
+.lvl-150{border-left:3px solid #a855f7}
+.lvl-155{border-left:3px solid #f43f5e}
+.lvl-158{border-left:3px solid #facc15}
+.card-header-area{padding:20px 20px 10px}
+.card-boss-name{font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:.5px}
+.card-body-flex{display:flex;align-items:center;gap:16px;padding:10px 20px 20px}
+.boss-avatar{
+  width:58px;height:58px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.05);
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.4);
+}
+.boss-info-details{display:flex;flex-direction:column;gap:5px;font-size:.85rem;color:var(--text-muted)}
+.info-row strong{color:var(--text-main);font-weight:600}
+.card-footer-timer{
+  padding:18px;text-align:center;cursor:pointer;
+  background:rgba(4,7,13,.5);border-top:1px solid var(--glass-border);
+  transition:background-color .2s;
+}
+.card-footer-timer:hover{background:rgba(0,0,0,.6)}
+.footer-next-title{font-size:1.6rem;color:#fff;font-weight:700;letter-spacing:-.5px}
+.footer-countdown{font-size:.8rem;color:var(--text-muted);margin-top:2px;font-weight:600;letter-spacing:.5px}
+.card.imminent{border-color:rgba(255,74,74,.25);background:linear-gradient(180deg,var(--glass-card) 0%,rgba(255,74,74,.02) 100%)}
+.card.imminent .footer-next-title{color:var(--neon-red);text-shadow:0 0 15px rgba(255,74,74,.3)}
+.card.completed{opacity:.2;filter:grayscale(100%)}
+.card.completed .footer-next-title{color:var(--neon-green)}
 
-        header h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, #ffffff 40%, var(--neon-gold) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        header p {
-            color: var(--text-muted);
-            margin-top: 8px;
-            font-size: 0.9rem;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .top-navigation {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 1280px;
-            background: var(--glass-panel);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 14px 24px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-            margin-bottom: 30px;
-        }
-
-        .filter-tabs {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .filter-tabs span {
-            color: var(--neon-gold);
-            font-size: 0.8rem;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            margin-right: 12px;
-        }
-
-        .tab-btn {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid transparent;
-            color: var(--text-muted);
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 8px 18px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-
-        .tab-btn:hover {
-            color: var(--text-main);
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .tab-btn.active {
-            color: #04060a;
-            background: var(--neon-gold);
-            font-weight: 700;
-            box-shadow: 0 0 15px var(--neon-gold-glow);
-        }
-
-        .search-container input {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            padding: 10px 16px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-            outline: none;
-            width: 280px;
-        }
-
-        .search-container input:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
-        }
-
-        .main-hud {
-            display: flex;
-            width: 100%;
-            max-width: 1280px;
-            gap: 30px;
-        }
-
-        .sidebar {
-            width: 290px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            flex-shrink: 0;
-        }
-
-        .side-panel {
-            background: var(--glass-panel);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 22px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-        }
-
-        .panel-title {
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            margin-bottom: 18px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .panel-title .side-brand {
-            margin-left: auto;
-            font-size: 0.7rem;
-            background: var(--trupe-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        .live-panel {
-            border: 1px solid rgba(255, 74, 74, 0.12);
-            background: radial-gradient(circle at 0% 0%, rgba(255, 74, 74, 0.05) 0%, var(--glass-panel) 100%);
-        }
-
-        .live-item {
-            background: rgba(255, 74, 74, 0.04);
-            border: 1px solid rgba(255, 74, 74, 0.12);
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-
-        .live-item:hover {
-            background: rgba(255, 74, 74, 0.1);
-            border-color: var(--neon-red);
-            transform: translateY(-2px);
-        }
-
-        .live-title {
-            font-weight: 700;
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-        }
-
-        .live-status {
-            color: var(--neon-red);
-            font-size: 0.8rem;
-            font-weight: 800;
-            animation: pulse-red-glow 1.2s infinite alternate;
-        }
-
-        .live-desc {
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            margin-top: 5px;
-        }
-
-        @keyframes pulse-red-glow {
-            from { opacity: 0.5; text-shadow: 0 0 0px var(--neon-red); }
-            to { opacity: 1; text-shadow: 0 0 10px var(--neon-red); }
-        }
-
-        .audio-btn, .clear-btn, .map-btn {
-            width: 100%;
-            border-radius: 10px;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 0.85rem;
-            padding: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            border: 1px solid var(--glass-border);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .audio-btn {
-            background: rgba(0, 255, 135, 0.05);
-            border-color: rgba(0, 255, 135, 0.15);
-            color: var(--neon-green);
-        }
-        .audio-btn:hover { background: rgba(0, 255, 135, 0.12); border-color: var(--neon-green); }
-
-        .audio-btn.muted {
-            background: rgba(255, 74, 74, 0.05);
-            border-color: rgba(255, 74, 74, 0.15);
-            color: var(--neon-red);
-        }
-        .audio-btn.muted:hover { background: rgba(255, 74, 74, 0.12); border-color: var(--neon-red); }
-
-        .progress-box {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 18px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.02);
-        }
-
-        .progress-box .counter {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: -1px;
-        }
-
-        .progress-box .label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 4px;
-            font-weight: 600;
-        }
-
-        .clear-btn { background: rgba(255,255,255,0.01); color: var(--text-muted); }
-        .clear-btn:hover { background: rgba(255, 74, 74, 0.08); color: var(--neon-red); border-color: rgba(255, 74, 74, 0.2); }
-
-        .map-btn { background: rgba(255,255,255,0.01); color: var(--text-main); }
-        .map-btn:hover { background: rgba(0, 210, 255, 0.08); color: var(--neon-blue); border-color: rgba(0, 210, 255, 0.2); }
-
-        .grid-container {
-            flex-grow: 1;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(48%, 1fr));
-            gap: 20px;
-            align-content: flex-start;
-        }
-
-        .card {
-            background: var(--glass-card);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        .card:hover {
-            border-color: rgba(255, 255, 255, 0.12);
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-
-        .card-lvl-badge {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-        }
-        
-        .card.lvl-140 { border-left: 3px solid #38bdf8; }
-        .card.lvl-141 { border-left: 3px solid #4ade80; }
-        .card.lvl-143 { border-left: 3px solid #06b6d4; }
-        .card.lvl-150 { border-left: 3px solid #a855f7; }
-        .card.lvl-155 { border-left: 3px solid #f43f5e; }
-
-        .card-header-area {
-            padding: 20px 20px 10px 20px;
-        }
-
-        .card-boss-name {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 0.5px;
-        }
-
-        .card-body-flex {
-            display: flex;
-            padding: 10px 20px 20px 20px;
-            gap: 16px;
-            align-items: center;
-        }
-
-        .boss-avatar {
-            width: 58px;
-            height: 58px;
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            flex-shrink: 0;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
-        }
-
-        .boss-info-details {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .info-row span strong {
-            color: var(--text-main);
-            font-weight: 600;
-        }
-
-        .card-footer-timer {
-            padding: 18px;
-            text-align: center;
-            background: rgba(4, 7, 13, 0.5);
-            border-top: 1px solid var(--glass-border);
-            cursor: pointer;
-        }
-
-        .card-footer-timer:hover {
-            background: rgba(0, 0, 0, 0.6);
-        }
-
-        .footer-next-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.6rem;
-            color: #fff;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .footer-countdown {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .card.imminent {
-            border-color: rgba(255, 74, 74, 0.25);
-            background: linear-gradient(180deg, var(--glass-card) 0%, rgba(255, 74, 74, 0.02) 100%);
-        }
-        .card.imminent .footer-next-title {
-            color: var(--neon-red);
-            text-shadow: 0 0 15px rgba(255, 74, 74, 0.3);
-        }
-
-        .card.completed {
-            opacity: 0.2;
-            filter: grayscale(100%);
-        }
-        .card.completed .footer-next-title {
-            color: var(--neon-green) !important;
-        }
-
-        @media (max-width: 950px) {
-            .main-hud { flex-direction: column; }
-            .sidebar { width: 100%; }
-            .grid-container { grid-template-columns: 1fr; }
-            .top-navigation { flex-direction: column; gap: 15px; }
-            .filter-tabs { flex-wrap: wrap; justify-content: center; }
-        }
-    </style>
+@media (max-width:950px){
+  .main-hud{flex-direction:column}
+  .sidebar{width:100%}
+  .grid-container{grid-template-columns:1fr}
+  .top-navigation{flex-direction:column;gap:15px}
+  .filter-tabs{flex-wrap:wrap;justify-content:center}
+}
+</style>
 </head>
 <body>
 
-    <header>
-        <div class="team-badge">Trupe Fantasma</div>
-        <h1>MIR4 BOSS TIMER</h1>
-        <p>Fuso Horário de Brasília (UTC-3) | Painel Operacional</p>
-    </header>
+<header>
+  <div class="team-badge">Trupe Fantasma</div>
+  <h1>MIR4 BOSS TIMER</h1>
+  <p>Fuso Horário de Brasília (UTC-3) | Painel Operacional</p>
+</header>
 
-    <div class="top-navigation">
-        <div class="filter-tabs">
-            <span>FILTRAR NÍVEL</span>
-            <button class="tab-btn active" onclick="filterByTab('all', this)">Todos</button>
-            <button class="tab-btn" onclick="filterByTab('140-', this)">140-</button>
-            <button class="tab-btn" onclick="filterByTab('141+', this)">141+</button>
-            <button class="tab-btn" onclick="filterByTab('143+', this)">143+</button>
-            <button class="tab-btn" onclick="filterByTab('150+', this)">150+</button>
-            <button class="tab-btn" onclick="filterByTab('155+', this)">155+</button>
-        </div>
-        <div class="search-container">
-            <input type="text" id="bossSearch" placeholder="Procurar boss específico..." oninput="updateHUD()">
-        </div>
+<div class="top-navigation">
+  <div class="filter-tabs" id="tabs">
+    <span>FILTRAR NÍVEL</span>
+    <button class="tab-btn active" data-lvl="all">Todos</button>
+    <button class="tab-btn" data-lvl="140-">140-</button>
+    <button class="tab-btn" data-lvl="141+">141+</button>
+    <button class="tab-btn" data-lvl="143+">143+</button>
+    <button class="tab-btn" data-lvl="150+">150+</button>
+    <button class="tab-btn" data-lvl="155+">155+</button>
+    <button class="tab-btn" data-lvl="158+">158+</button>
+  </div>
+  <div class="search-container">
+    <input type="text" id="bossSearch" placeholder="Procurar boss específico..." autocomplete="off">
+  </div>
+</div>
+
+<div class="main-hud">
+  <div class="sidebar">
+    <button id="audioToggleBtn" class="audio-btn"><span>🔊</span> <span>Notificação por Voz: ON</span></button>
+
+    <div class="side-panel live-panel">
+      <div class="panel-title"><span>⚔️</span> VIVOS NO MAPA AGORA <span class="side-brand">TRUPE FANTASMA</span></div>
+      <div id="liveBossesContainer"></div>
     </div>
 
-    <div class="main-hud">
-        <div class="sidebar">
-            <button id="audioToggleBtn" class="audio-btn" onclick="toggleAudioGlobal()">
-                <span>🔊</span> <span>Notificação por Voz: ON</span>
-            </button>
-
-            <div class="side-panel live-panel">
-                <div class="panel-title">
-                    <span>⚔️</span> VIVOS NO MAPA AGORA
-                    <span class="side-brand">TRUPE FANTASMA</span>
-                </div>
-                <div id="liveBossesContainer">
-                    <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 5px;">Nenhum boss ativo</div>
-                </div>
-            </div>
-
-            <div class="side-panel">
-                <div class="panel-title"><span>📊</span> PROGRESSO DA SEMANA</div>
-                <div class="progress-box">
-                    <div id="weeklyCounter" class="counter">0 / 0</div>
-                    <div class="label">Abates Confirmados</div>
-                </div>
-            </div>
-
-            <button class="clear-btn" onclick="resetWeeklyList()">
-                Resetar Concluídos da Semana
-            </button>
-            
-            <button class="map-btn">
-                Abrir Mapa de Rotas
-            </button>
-        </div>
-
-        <div class="grid-container" id="bossGrid"></div>
+    <div class="side-panel">
+      <div class="panel-title"><span>📊</span> PROGRESSO DA SEMANA</div>
+      <div class="progress-box">
+        <div id="weeklyCounter" class="counter">0 / 0</div>
+        <div class="label">Abates Confirmados</div>
+      </div>
     </div>
 
-    <script>
-        let currentTabFilter = 'all';
-        let isAudioEnabled = true;
-        const activeAudioAlerts = new Set();
+    <button id="resetBtn" class="clear-btn">Resetar Concluídos da Semana</button>
+  </div>
 
-        // Elementos armazenados em cache para ganho de performance e fluidez
-        const gridEl = document.getElementById('bossGrid');
-        const liveContainerEl = document.getElementById('liveBossesContainer');
-        const searchInputEl = document.getElementById('bossSearch');
-        const weeklyCounterEl = document.getElementById('weeklyCounter');
+  <div class="grid-container" id="bossGrid"></div>
+</div>
 
-        const bossData = [
-            { id: "mata", lvl: "140-", class: "lvl-140", world: "L3W1", map: "Floresta do Touro Malvado", boss: "Mata", icon: "🐂", times: ["00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"] },
-            { id: "touro_trovejante", lvl: "140-", class: "lvl-140", world: "L3W1", map: "1F do Templo do Touro", boss: "Touro Trovejante", icon: "🦬", times: ["01:00", "03:00", "05:00", "07:00", "09:00", "11:00", "13:00", "15:00", "17:00", "19:00", "21:00", "23:00"] },
-            { id: "rei_touros_malvados", lvl: "140-", class: "lvl-140", world: "L3W1", map: "Santuário do Rei dos Touros Malvados", boss: "Rei dos Touros Malvados", icon: "👑", times: ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"] },
-            { id: "velho_ermo", lvl: "140-", class: "lvl-140", world: "L3W8", map: "Círculo de Selo dos Gigantes Brancos", boss: "Velho do Ermo", icon: "🧙‍♂️", times: ["01:00", "05:00", "09:00", "13:00", "17:00", "21:00"] },
-            { id: "taehyul", lvl: "141+", class: "lvl-141", world: "L3W7", map: "Jardim de Taehyul", boss: "Taehyul", icon: "🪴", times: ["01:00", "03:00", "05:00", "07:00", "09:00", "11:00", "13:00", "15:00", "17:00", "19:00", "21:00", "23:00"] },
-            { id: "yiun", lvl: "141+", class: "lvl-141", world: "L3W7", map: "Construção Principal do Culto Demoniaco", boss: "Yiun", icon: "🩸", times: ["02:00", "05:00", "08:00", "11:00", "14:00", "17:00", "20:00", "23:00"] },
-            { id: "santidade_nefariox", lvl: "141+", class: "lvl-141", world: "L3W4", map: "Deserto de Phantasia", boss: "Santidade Inabalável Nefariox", icon: "🦂", times: ["00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"] },
-            { id: "kurilaica", lvl: "141+", class: "lvl-141", world: "L3W4", map: "Círculo de Selo do Suserano", boss: "Kurilaica", icon: "🦎", times: ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"] },
-            { id: "juhui", lvl: "143+", class: "lvl-143", world: "L3W2", map: "Montanha da Lúnula de Sangue", boss: "Juhui", icon: "🌙", times: ["02:30", "05:30", "08:30", "11:30", "14:30", "17:30", "20:30", "23:30"] },
-            { id: "faluk", lvl: "143+", class: "lvl-143", world: "L3W5", map: "Grande Muralha de Sabuk", boss: "Faluk", icon: "🧱", times: ["00:30", "03:30", "06:30", "09:30", "12:30", "15:30", "18:30", "21:30"] },
-            { id: "assombracao_destruidora", lvl: "143+", class: "lvl-143", world: "L3W5", map: "Templo Ilusório", boss: "Assombração Destruidora de Histórias", icon: "🔮", times: ["01:30", "04:30", "07:30", "10:30", "13:30", "16:30", "19:30", "22:30"] },
-            { id: "gyo_besta", lvl: "150+", class: "lvl-150", world: "L3W3", map: "Necrópole de Nefariox", boss: "Gyo da Besta", icon: "💀", times: ["02:30", "08:30", "14:30", "20:30"] },
-            { id: "imperador_tatu", lvl: "150+", class: "lvl-150", world: "L3W3", map: "Planície das Víboras Monstruosas", boss: "Imperador Tatu Sombrio", icon: "🐍", times: ["01:30", "03:30", "05:30", "07:30", "09:30", "11:30", "13:30", "15:30", "17:30", "19:30", "21:30", "23:30"] },
-            { id: "bodoo", lvl: "150+", class: "lvl-150", world: "L3W3", map: "Túmulo de Rockcut", boss: "Budu", icon: "👺", times: ["03:30", "09:30", "15:30", "21:30"] },
-            { id: "mara", lvl: "150+", class: "lvl-150", world: "L3W3", map: "Túmulo de Rockcut", boss: "Mara", icon: "🪨", times: ["02:30", "05:30", "08:30", "11:30", "14:30", "17:30", "20:30", "23:30"] },
-            { id: "asura_bicheon", lvl: "150+", class: "lvl-150", world: "L3W6", map: "Cidade Bicheon", boss: "Asura de Bicheon", icon: "⚔️", times: ["04:30", "10:30", "16:30", "22:30"] },
-            { id: "cheol_mokgang", lvl: "150+", class: "lvl-150", world: "L3W6", map: "Cidade Bicheon", boss: "Cheol Mokgang", icon: "🪵", times: ["00:30", "02:30", "04:30", "06:30", "08:30", "10:30", "12:30", "14:30", "16:30", "18:30", "20:30", "22:30"] },
-            { id: "wuihan", lvl: "150+", class: "lvl-150", world: "L3W6", map: "Bosques Fantasmas", boss: "Wuihan", icon: "👻", times: ["05:30", "11:30", "17:30", "23:30"] },
-            { id: "hong_yeom", lvl: "150+", class: "lvl-150", world: "L3W6", map: "Abisso da Mina Demoníaca", boss: "Hong Yeom Transformada", icon: "🔥", times: ["01:30", "03:30", "05:30", "07:30", "09:30", "11:30", "13:30", "15:30", "17:30", "19:30", "21:30", "23:30"] },
-            { id: "yeti", lvl: "150+", class: "lvl-150", world: "L3W6", map: "Labirinto de Bicheon", boss: "Yeti", icon: "❄️", times: ["00:30", "06:30", "12:30", "18:30"] },
-            { id: "jihwa", lvl: "155+", class: "lvl-155", world: "L1W1", map: "Cidade Unseo", boss: "Jihwa", icon: "🦊", times: ["02:30", "05:30", "08:30", "11:30", "14:30", "17:30", "20:30", "23:30"] },
-            { id: "tatu_gigante", lvl: "155+", class: "lvl-155", world: "L1W1", map: "Montanha dos Sete Vales", boss: "Tatu Gigante", icon: "🛡️", times: ["00:30", "03:30", "06:30", "09:30", "12:30", "15:30", "18:30", "21:30"] },
-            { id: "yaksha", lvl: "155+", class: "lvl-155", world: "L1W1", map: "Montanha dos Sete Vales", boss: "Yaksha", icon: "👹", times: ["03:30", "09:30", "15:30", "21:30"] },
-            { id: "bulhu", lvl: "155+", class: "lvl-155", world: "L1W1", map: "Ilha do Fogo Ardente", boss: "Bulhu", icon: "🌋", times: ["04:30", "10:30", "16:30", "22:30"] },
-            { id: "bolota_m1", lvl: "155+", class: "lvl-155", world: "L1W1", map: "Ilha do Fogo Ardente", boss: "Bolota Mapa 1", icon: "🗿", times: ["03:00", "09:00", "15:00", "21:00"] },
-            { id: "gwe_mukang", lvl: "155+", class: "lvl-155", world: "L1W2", map: "Campo de Gelo do Dragão Noveno", boss: "Gwe Mukang", icon: "🐉", times: ["05:30", "11:30", "17:30", "23:30"] },
-            { id: "do_maeongryong", lvl: "155+", class: "lvl-155", world: "L1W2", map: "Prisão Subterrânea", boss: "Do Maeongryong", icon: "⛓️", times: ["00:30", "06:30", "12:30", "18:30"] },
-            { id: "molgrash", lvl: "155+", class: "lvl-155", world: "L1W2", map: "Prisão Subterrânea", boss: "Molgrash", icon: "🧌", times: ["01:30", "04:30", "07:30", "10:30", "13:30", "16:30", "19:30", "22:30"] },
-            { id: "wi_gwangryeong", lvl: "155+", class: "lvl-155", world: "L1W2", map: "Palácio do Dragão Noveno", boss: "Wi Gwangryeong", icon: "⛩️", times: ["02:30", "05:30", "08:30", "11:30", "14:30", "17:30", "20:30", "23:30"] },
-            { id: "bolota_m2", lvl: "155+", class: "lvl-155", world: "L1W2", map: "Palácio do Dragão Noveno", boss: "Bolota Mapa 2", icon: "🔱", times: ["05:00", "11:00", "17:00", "23:00"] }
-        ];
+<script>
+"use strict";
+const MIN = 60000, DAY = 86400000;
+const KEY = id => "mir4_boss_" + id;
 
-        function toggleAudioGlobal() {
-            isAudioEnabled = !isAudioEnabled;
-            const btn = document.getElementById('audioToggleBtn');
-            btn.className = isAudioEnabled ? "audio-btn" : "audio-btn muted";
-            btn.innerHTML = isAudioEnabled ? `<span>🔊</span> <span>Notificação por Voz: ON</span>` : `<span>🔇</span> <span>Notificação por Voz: OFF</span>`;
-            if (!isAudioEnabled) window.speechSynthesis.cancel();
-        }
+const RAW = [
+  ["mata","140-",3,1,"Floresta do Touro Malvado","Mata","🐂","00:00",2],
+  ["touro_trovejante","140-",3,1,"1F do Templo do Touro","Touro Trovejante","🦬","01:00",2],
+  ["rei_touros_malvados","140-",3,1,"Santuário do Rei dos Touros Malvados","Rei dos Touros Malvados","👑","00:00",3],
+  ["velho_ermo","140-",3,8,"Círculo de Selo dos Gigantes Brancos","Velho do Ermo","🧙‍♂️","01:00",4],
+  ["taehyul","141+",3,7,"Jardim de Taehyul","Taehyul","🪴","01:00",2],
+  ["yiun","141+",3,7,"Construção Principal do Culto Demoniaco","Yiun","🩸","02:00",3],
+  ["santidade_nefariox","141+",3,4,"Deserto de Phantasia","Santidade Inabalável Nefariox","🦂","00:00",2],
+  ["kurilaica","141+",3,4,"Círculo de Selo do Suserano","Kurilaica","🦎","00:00",3],
+  ["juhui","143+",3,2,"Montanha da Lúnula de Sangue","Juhui","🌙","02:30",3],
+  ["faluk","143+",3,5,"Grande Muralha de Sabuk","Faluk","🧱","00:30",3],
+  ["assombracao_destruidora","143+",3,5,"Templo Ilusório","Assombração Destruidora de Histórias","🔮","01:30",3],
+  ["gyo_besta","150+",3,3,"Necrópole de Nefariox","Gyo da Besta","💀","02:30",6],
+  ["imperador_tatu","150+",3,3,"Planície das Víboras Monstruosas","Imperador Tatu Sombrio","🐍","01:30",2],
+  ["bodoo","150+",3,3,"Túmulo de Rockcut","Budu","👺","03:30",6],
+  ["mara","150+",3,3,"Túmulo de Rockcut","Mara","🪨","02:30",3],
+  ["asura_bicheon","150+",3,6,"Cidade Bicheon","Asura de Bicheon","⚔️","04:30",6],
+  ["cheol_mokgang","150+",3,6,"Cidade Bicheon","Cheol Mokgang","🪵","00:30",2],
+  ["wuihan","150+",3,6,"Bosques Fantasmas","Wuihan","👻","05:30",6],
+  ["hong_yeom","150+",3,6,"Abisso da Mina Demoníaca","Hong Yeom Transformada","🔥","01:30",2],
+  ["yeti","150+",3,6,"Labirinto de Bicheon","Yeti","❄️","00:30",6],
+  ["jihwa","155+",1,1,"Cidade Unseo","Jihwa","🦊","02:30",3],
+  ["tatu_gigante","155+",1,1,"Montanha dos Sete Vales","Tatu Gigante","🛡️","00:30",3],
+  ["yaksha","155+",1,1,"Montanha dos Sete Vales","Yaksha","👹","03:30",6],
+  ["bulhu","155+",1,1,"Ilha do Fogo Ardente","Bulhu","🌋","04:30",6],
+  ["bolota_m1","155+",1,1,"Ilha do Fogo Ardente","Bolota Mapa 1","🗿","03:00",6],
+  ["gwe_mukang","155+",1,2,"Campo de Gelo do Dragão Noveno","Gwe Mukang","🐉","05:30",6],
+  ["do_maeongryong","155+",1,2,"Prisão Subterrânea","Do Maeongryong","⛓️","00:30",6],
+  ["molgrash","155+",1,2,"Prisão Subterrânea","Molgrash","🧌","01:30",3],
+  ["wi_gwangryeong","155+",1,2,"Palácio do Dragão Noveno","Wi Gwangryeong","⛩️","02:30",3],
+  ["bolota_m2","155+",1,2,"Palácio do Dragão Noveno","Bolota Mapa 2","🔱","05:00",6],
+  ["krog_158","158+",1,3,"Ruínas do Nefariox Primal","Krog","🐗","01:30",6],
+  ["kelis_158","158+",1,3,"Desfiladeiro Congelado","Kelis","🦅","02:30",6],
+  ["talasa_158","158+",1,3,"Desfiadeiro Congelado","Talasa","🌊","02:30",3],
+  ["barkas_158","158+",1,3,"Antiga Fortaleza dos Ancestrais","Barkas","🦇","03:30",6],
+  ["bargan_158","158+",1,3,"Templo das Hidras","Bargan","🐺","00:30",3],
+  ["morg_158","158+",1,3,"Templo das Hidras","Morg","🕷️","04:30",6],
+  ["bordo_158","158+",1,3,"Abisso de Hidra","Bordo","🐲","05:30",6]
+];
 
-        function playVoiceAlert(bossName) {
-            if (!isAudioEnabled) return;
-            const utterance = new SpeechSynthesisUtterance(`Atenção Trupe Fantasma, o chefe ${bossName} vai nascer em cinco minutos!`);
-            utterance.lang = 'pt-BR';
-            utterance.rate = 1.05;
-            window.speechSynthesis.speak(utterance);
-        }
+const pad = n => (n < 10 ? "0" : "") + n;
+const fmt = t => pad(t / 60 | 0) + ":" + pad(t % 60);
 
-        function filterByTab(lvl, element) {
-            currentTabFilter = lvl;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
-            updateHUD();
-        }
+const bosses = RAW.map(([id, lvl, camada, mundo, map, boss, icon, start, step]) => {
+  const [h, m] = start.split(":");
+  const times = [];
+  for (let t = h * 60 + +m; t < 1440; t += step * 60) times.push(t);
+  return {
+    id, lvl, map, boss, icon, times,
+    cls: "lvl-" + parseInt(lvl),
+    head: `<span class="card-lvl-badge">LVL ${lvl}</span>
+<div class="card-header-area"><div class="card-boss-name">${boss.toUpperCase()}</div></div>
+<div class="card-body-flex"><div class="boss-avatar">${icon}</div><div class="boss-info-details">
+<div class="info-row">📍 <span>Mapa: <strong>${map}</strong></span></div>
+<div class="info-row">🗺️ <span>Mundo: <strong>Camada ${camada} Mundo ${mundo}</strong></span></div>
+<div class="info-row">⏰ <span>Ciclos: <strong>${times.length}/dia</strong></span></div></div></div>`
+  };
+});
 
-        function toggleBossStatus(bossId) {
-            const currentStatus = localStorage.getItem(`mir4_boss_${bossId}`) === 'true';
-            localStorage.setItem(`mir4_boss_${bossId}`, currentStatus ? 'false' : 'true');
-            updateHUD();
-        }
+const $ = id => document.getElementById(id);
+const gridEl = $("bossGrid"), liveEl = $("liveBossesContainer"), searchEl = $("bossSearch"),
+      counterEl = $("weeklyCounter"), audioBtn = $("audioToggleBtn"), tabsEl = $("tabs");
+const EMPTY_LIVE = '<div class="live-empty">Nenhum chefe ativo</div>';
 
-        function resetWeeklyList() {
-            if (confirm("Gostaria de limpar o histórico de chefes concluídos da semana?")) {
-                bossData.forEach(item => localStorage.removeItem(`mir4_boss_${item.id}`));
-                updateHUD();
-            }
-        }
+let tabFilter = "all", audioOn = true;
+const alerted = new Set();
+const done = new Set();
 
-        function updateHUD() {
-            const searchInput = searchInputEl.value.toLowerCase();
-            const now = new Date();
-            const currentHours = now.getHours();
-            const currentMinutes = now.getMinutes();
-            const currentTimeStr = `${String(currentHours).padStart(2, '0')}:${String(currentMinutes).padStart(2, '0')}`;
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+const loadDone = () => { done.clear(); bosses.forEach(b => lsGet(KEY(b.id)) === "true" && done.add(b.id)); };
 
-            let liveBossesHtml = '';
-            let killedCount = 0;
-            
-            // Fragmento de documento para otimizar injeção de DOM em lote (Elimina gargalos de processamento)
-            const fragment = document.createDocumentFragment();
+function voiceAlert(name) {
+  if (!audioOn || !("speechSynthesis" in window)) return;
+  const u = new SpeechSynthesisUtterance(`Atenção Trupe Fantasma, o chefe ${name} vai nascer em cinco minutos!`);
+  u.lang = "pt-BR";
+  u.rate = 1.05;
+  speechSynthesis.speak(u);
+}
 
-            // Loop único processando ordenação e renderização simultaneamente para maior rapidez
-            const processed = bossData.map(item => {
-                const isCompleted = localStorage.getItem(`mir4_boss_${item.id}`) === 'true';
-                if (isCompleted) killedCount++;
+let lastSig = "", lastLive = null, lastCount = "", cdEls = [], cdTxt = [], shown = [];
 
-                let activeSpawnTime = null;
-                item.times.forEach(t => {
-                    const [th, tm] = t.split(':').map(Number);
-                    let spawnDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), th, tm, 0);
-                    if (currentHours === 0 && th === 23) spawnDate.setDate(spawnDate.getDate() - 1);
+function render(force) {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const nowMs = (nowMin * 60 + now.getSeconds()) * 1000 + now.getMilliseconds();
+  const q = searchEl.value.toLowerCase();
+  let live = "";
+  const rows = [];
 
-                    let ageMs = now - spawnDate;
-                    if (ageMs >= 0 && ageMs <= 15 * 60 * 1000) activeSpawnTime = t;
-                });
+  for (const b of bosses) {
+    const isDone = done.has(b.id);
+    let spawn = null;
+    for (const t of b.times) if ((nowMs - t * MIN + DAY) % DAY <= 15 * MIN) spawn = t;
+    if (spawn !== null && !isDone) {
+      live += `<div class="live-item" data-id="${b.id}"><div class="live-title"><span>${b.boss.toUpperCase()}</span><span class="live-status">● ATIVO</span></div><div class="live-desc">Spawn: ${fmt(spawn)} • ${b.map}</div></div>`;
+    }
+    let nx = b.times.find(t => t > nowMin);
+    if (nx === undefined) nx = b.times[0];
+    let diff = nx * MIN - nowMs;
+    if (diff < 0) diff += DAY;
+    rows.push({ b, isDone, nx, diff });
+  }
+  rows.sort((a, c) => a.diff - c.diff);
 
-                if (activeSpawnTime && !isCompleted) {
-                    liveBossesHtml += `
-                        <div class="live-item" onclick="toggleBossStatus('${item.id}')">
-                            <div class="live-title">
-                                <span>${item.boss.toUpperCase()}</span>
-                                <span class="live-status">● ATIVO</span>
-                            </div>
-                            <div class="live-desc">Spawn: ${activeSpawnTime} • ${item.map}</div>
-                        </div>`;
-                }
+  const countTxt = `${done.size} / ${bosses.length}`;
+  if (countTxt !== lastCount) { counterEl.textContent = countTxt; lastCount = countTxt; }
+  live = live || EMPTY_LIVE;
+  if (live !== lastLive) { liveEl.innerHTML = live; lastLive = live; }
 
-                let nextTimeStr = item.times.find(t => t > currentTimeStr) || item.times[0];
-                const [nextH, nextM] = nextTimeStr.split(':').map(Number);
-                let targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), nextH, nextM, 0);
-                
-                let diffMs = targetDate - now;
-                if (diffMs < 0) {
-                    targetDate.setDate(targetDate.getDate() + 1);
-                    diffMs = targetDate - now;
-                }
+  const vis = [];
+  for (const r of rows) {
+    const { b } = r;
+    if (tabFilter !== "all" && b.lvl !== tabFilter) continue;
+    if (q && !b.boss.toLowerCase().includes(q)) continue;
+    r.h = r.diff / 3600000 | 0;
+    r.m = r.diff % 3600000 / 60000 | 0;
+    r.s = r.diff % 60000 / 1000 | 0;
+    if (!r.isDone && r.h === 0 && r.m === 5) {
+      const k = b.id + "_" + r.nx;
+      if (!alerted.has(k)) { voiceAlert(b.boss); alerted.add(k); }
+    }
+    r.st = r.isDone ? " completed" : (r.h === 0 && r.m < 5 ? " imminent" : "");
+    r.cd = r.isDone ? "✓ Concluído na Semana" : `Tempo restante: ${pad(r.h)}:${pad(r.m)}:${pad(r.s)}`;
+    vis.push(r);
+  }
 
-                return { ...item, nextTimeStr, diffMs, isCompleted };
-            }).sort((a, b) => a.diffMs - b.diffMs);
+  const sig = vis.map(r => r.b.id + r.st + r.nx).join("|");
+  if (force || sig !== lastSig) {
+    gridEl.innerHTML = vis.map(r =>
+      `<div class="card ${r.b.cls}${r.st}">${r.b.head}<div class="card-footer-timer" data-id="${r.b.id}"><div class="footer-next-title">${r.isDone ? "EM RE-RESPAWN" : "PRÓXIMO: " + fmt(r.nx)}</div><div class="footer-countdown">${r.cd}</div></div></div>`
+    ).join("");
+    cdEls = gridEl.getElementsByClassName("footer-countdown");
+    cdTxt = vis.map(r => r.cd);
+    lastSig = sig;
+  } else {
+    for (let i = 0; i < vis.length; i++) {
+      if (cdTxt[i] !== vis[i].cd) { cdEls[i].textContent = vis[i].cd; cdTxt[i] = vis[i].cd; }
+    }
+  }
+}
 
-            weeklyCounterEl.innerText = `${killedCount} / ${bossData.length}`;
-            liveContainerEl.innerHTML = liveBossesHtml || `<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 5px;">Nenhum chefe ativo</div>`;
+function toggleBoss(id) {
+  const on = !done.has(id);
+  on ? done.add(id) : done.delete(id);
+  lsSet(KEY(id), on ? "true" : null);
+  render(true);
+}
 
-            processed.forEach(item => {
-                if (currentTabFilter !== 'all' && item.lvl !== currentTabFilter) return;
-                if (searchInput && !item.boss.toLowerCase().includes(searchInput)) return;
+gridEl.addEventListener("click", e => {
+  const el = e.target.closest(".card-footer-timer");
+  if (el) toggleBoss(el.dataset.id);
+});
+liveEl.addEventListener("click", e => {
+  const el = e.target.closest(".live-item");
+  if (el) toggleBoss(el.dataset.id);
+});
+tabsEl.addEventListener("click", e => {
+  const btn = e.target.closest(".tab-btn");
+  if (!btn) return;
+  tabsEl.querySelector(".active").classList.remove("active");
+  btn.classList.add("active");
+  tabFilter = btn.dataset.lvl;
+  render(true);
+});
+searchEl.addEventListener("input", () => render(true));
+audioBtn.addEventListener("click", () => {
+  audioOn = !audioOn;
+  audioBtn.className = audioOn ? "audio-btn" : "audio-btn muted";
+  audioBtn.innerHTML = audioOn
+    ? "<span>🔊</span> <span>Notificação por Voz: ON</span>"
+    : "<span>🔇</span> <span>Notificação por Voz: OFF</span>";
+  if (!audioOn && "speechSynthesis" in window) speechSynthesis.cancel();
+});
+$("resetBtn").addEventListener("click", () => {
+  if (confirm("Gostaria de limpar o histórico de chefes concluídos da semana?")) {
+    bosses.forEach(b => lsSet(KEY(b.id), null));
+    done.clear();
+    render(true);
+  }
+});
+addEventListener("storage", () => { loadDone(); render(true); });
 
-                let diffHrs = Math.floor(item.diffMs / 3600000);
-                let diffMins = Math.floor((item.diffMs % 3600000) / 60000);
-                let diffSecs = Math.floor((item.diffMs % 60000) / 1000);
-
-                if (!item.isCompleted && diffHrs === 0 && diffMins === 5) {
-                    const alertKey = `${item.id}_${item.nextTimeStr}`;
-                    if (!activeAudioAlerts.has(alertKey)) {
-                        playVoiceAlert(item.boss);
-                        activeAudioAlerts.add(alertKey);
-                    }
-                }
-
-                let statusClass = '';
-                if (item.isCompleted) statusClass = 'completed';
-                else if (diffHrs === 0 && diffMins < 5) statusClass = 'imminent';
-
-                const card = document.createElement('div');
-                card.className = `card ${item.class} ${statusClass}`;
-                card.innerHTML = `
-                    <span class="card-lvl-badge">LVL ${item.lvl}</span>
-                    <div class="card-header-area">
-                        <div class="card-boss-name">${item.boss.toUpperCase()}</div>
-                    </div>
-                    <div class="card-body-flex">
-                        <div class="boss-avatar">${item.icon}</div>
-                        <div class="boss-info-details">
-                            <div class="info-row">📍 <span>Mapa: <strong>${item.map}</strong></span></div>
-                            <div class="info-row">🗺️ <span>Mundo: <strong>${item.world}</strong></span></div>
-                            <div class="info-row">⏰ <span>Ciclos: <strong>${item.times.length}/dia</strong></span></div>
-                        </div>
-                    </div>
-                    <div class="card-footer-timer" onclick="toggleBossStatus('${item.id}')">
-                        <div class="footer-next-title">${item.isCompleted ? 'EM RE-RESPAWN' : 'PRÓXIMO: ' + item.nextTimeStr}</div>
-                        <div class="footer-countdown">${item.isCompleted ? '✓ Concluído na Semana' : 'Tempo restante: ' + String(diffHrs).padStart(2, '0') + ':' + String(diffMins).padStart(2, '0') + ':' + String(diffSecs).padStart(2, '0')}</div>
-                    </div>`;
-                fragment.appendChild(card);
-            });
-
-            gridEl.innerHTML = '';
-            gridEl.appendChild(fragment);
-        }
-
-        updateHUD();
-        setInterval(updateHUD, 1000);
-    </script>
+loadDone();
+render(true);
+setInterval(render, 1000);
+</script>
 </body>
 </html>
